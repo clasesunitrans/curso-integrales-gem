@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curso Interactivo de Integrales</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- VARIABLES Y RESETEO GENERAL --- */
+        :root {
+            --bg-main: #121212;
+            --bg-panel: #1E1E1E;
+            --accent-primary: #00BFFF; /* Azul eléctrico */
+            --accent-secondary: #DA70D6; /* Magenta */
+            --text-main: #EAEAEA;
+            --text-code: #39FF14; /* Verde menta */
+            --border-color: #333;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden; /* Evita el scroll en el body */
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.7;
+        }
+
+        /* --- LAYOUT PRINCIPAL --- */
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* --- BARRA LATERAL (NAVEGACIÓN) --- */
+        .sidebar {
+            width: 25%;
+            min-width: 280px;
+            background-color: var(--bg-panel);
+            border-right: 1px solid var(--border-color);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .sidebar h2 {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-primary);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .nav-list {
+            list-style: none;
+        }
+
+        .nav-list li a {
+            display: block;
+            padding: 0.8rem 1rem;
+            text-decoration: none;
+            color: var(--text-main);
+            font-weight: 400;
+            border-radius: 8px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-list li a:hover {
+            background-color: rgba(0, 191, 255, 0.1);
+        }
+
+        .nav-list li a.active {
+            background-color: var(--accent-primary);
+            color: var(--bg-main);
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0, 191, 255, 0.2);
+        }
+        
+        .btn-print {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background-color: var(--accent-secondary);
+            color: white;
+            border: none;
+            padding: 0.7rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            width: 100%;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-print:hover {
+            background-color: #c45db1;
+        }
+
+        /* --- PANEL DE CONTENIDO --- */
+        .content-panel {
+            width: 75%;
+            padding: 3rem;
+            overflow-y: auto; /* Permite scroll solo en esta área */
+        }
+
+        .chapter-content {
+            display: none; /* Oculto por defecto */
+        }
+
+        .chapter-content.active {
+            display: block; /* Visible cuando está activo */
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chapter-content h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+        }
+
+        .chapter-content h1 .accent-char {
+            color: var(--accent-primary);
+        }
+
+        .intro-text {
+            font-size: 1.1rem;
+            color: #b0b0b0;
+            margin-bottom: 2.5rem;
+            max-width: 80ch;
+        }
+
+        /* --- TARJETAS DE CONTENIDO --- */
+        .card {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px var(--shadow-color);
+            overflow: hidden;
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            color: var(--accent-primary);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .card.note h2 { color: var(--accent-secondary); }
+        .card.app h2 { color: #39FF14; }
+
+        .card p, .card li {
+            font-size: 1rem;
+            color: var(--text-main);
+        }
+        
+        .card strong {
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+
+        .card ol, .card ul {
+            padding-left: 20px;
+            margin-top: 1rem;
+        }
+
+        pre {
+            background-color: var(--bg-main);
+            color: var(--text-code);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1rem;
+        }
+
+        /* --- SECCIÓN DE QUIZ --- */
+        .quiz-section {
+            border-top: 2px solid var(--accent-primary);
+            margin-top: 3rem;
+            padding-top: 2rem;
+        }
+
+        .quiz-section h2 {
+            font-size: 1.8rem;
+            color: var(--text-main);
+            margin-bottom: 2rem;
+        }
+
+        .question {
+            margin-bottom: 2rem;
+        }
+
+        .question p {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .options label {
+            display: block;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .solution {
+            display: none;
+            background-color: rgba(57, 255, 20, 0.1);
+            border-left: 4px solid var(--text-code);
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 4px;
+        }
+        
+        .solution p {
+            color: var(--text-code);
+            font-weight: bold;
+        }
+
+        .btn-solution {
+            background-color: var(--accent-secondary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 0.5rem;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+        }
+
+        .btn-solution:hover {
+            background-color: #c45db1;
+        }
+
+        /* --- ELEMENTO INTERACTIVO: SUMA DE RIEMANN --- */
+        .interactive-container {
+            text-align: center;
+        }
+
+        #riemann-canvas {
+            background-color: #fff;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            aspect-ratio: 1.5 / 1;
+        }
+        
+        .controls {
+            margin-top: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .slider-container label {
+            font-weight: 600;
+        }
+
+        #n-slider {
+            width: 100%;
+            cursor: pointer;
+        }
+        
+        .info-display {
+            font-size: 1.1rem;
+            font-weight: 600;
+            background-color: var(--bg-main);
+            padding: 1rem;
+            border-radius: 8px;
+            min-width: 300px;
+        }
+
+        .info-display span {
+            color: var(--accent-secondary);
+        }
+
+        /* --- RESPONSIVE DESIGN --- */
+        @media (max-width: 1024px) {
+            .app-container {
+                flex-direction: column;
+                height: auto;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                min-width: unset;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+            .content-panel {
+                width: 100%;
+                height: auto;
+                padding: 1.5rem;
+            }
+            body, html {
+                overflow: auto;
+            }
+        }
+        
+        @media print {
+            .sidebar {
+                display: none;
+            }
+            .content-panel {
+                width: 100%;
+                padding: 0;
+            }
+            .card {
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
+            .quiz-section h2, .btn-solution, .interactive-container {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- BARRA LATERAL DE NAVEGACIÓN -->
+        <aside class="sidebar">
+            <div class="logo">
+                <span class="logo-icon">∫</span>
+                <h1>Curso de Integrales</h1>
+            </div>
+            <button id="print-pdf-btn" class="btn-print">🖨️ Imprimir Resumen</button>
+            <h2>Temario del Curso</h2>
+            <nav>
+                <ul class="nav-list">
+                    <li><a href="#cap1" class="nav-link active">Cap. 1: Integrales Indefinidas</a></li>
+                    <li><a href="#cap2" class="nav-link">Cap. 2: Conceptos Fundamentales</a></li>
+                    <li><a href="#cap3" class="nav-link">Cap. 3: Propiedades de las Integrales</a></li>
+                    <li><a href="#cap4" class="nav-link">Cap. 4: Integrales Inmediatas</a></li>
+                    <li><a href="#cap5" class="nav-link">Cap. 5: Por Cambio de Variable</a></li>
+                    <li><a href="#cap6" class="nav-link">Cap. 6: Integrales por Partes</a></li>
+                    <li><a href="#cap7" class="nav-link">Cap. 7: Integral Definida</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- PANEL PRINCIPAL DE CONTENIDO -->
+        <main class="content-panel">
+
+            <!-- CAPÍTULO 1 -->
+            <div id="cap1" class="chapter-content active">
+                <h1><span class="accent-char">1.</span> Integrales Indefinidas 📈</h1>
+                <p class="intro-text">¡Bienvenido al punto de partida! Aquí descubrirás que la integración es como viajar en el tiempo... ¡pero con funciones! Es el proceso inverso a la derivación. ¡Vamos a ello!</p>
+                
+                <div class="card definition">
+                  <h2>🧠 Definición: Antiderivada</h2>
+                  <p>Una función <strong>F(x)</strong> es una <strong>antiderivada</strong> o <strong>integral indefinida</strong> de <strong>f(x)</strong> si la derivada de F(x) es igual a f(x). Es decir, <strong>F'(x) = f(x)</strong>. Como la derivada de una constante es cero, siempre añadimos una "constante de integración" <strong>C</strong>.</p>
+                  <pre><code>∫ f(x) dx = F(x) + C</code></pre>
+                </div>
+
+                <div class="card example">
+                  <h2>✍️ Ejemplo Resuelto: Paso a Paso</h2>
+                  <p>Vamos a encontrar la integral indefinida de <strong>f(x) = 3x²</strong>.</p>
+                  <ol>
+                    <li><strong>Identificamos el integrando:</strong> La función a integrar es 3x².</li>
+                    <li><strong>Pensamos al revés:</strong> ¿Qué función, al derivarla, nos da 3x²? Si recordamos las reglas de derivación, la derivada de x³ es 3x².</li>
+                    <li><strong>Añadimos la constante:</strong> No podemos olvidar la constante de integración C, ya que la derivada de x³ + 5 (o cualquier constante) también es 3x².</li>
+                    <li><strong>Resultado:</strong> La integral es x³ + C.</li>
+                  </ol>
+                  <pre><code>∫ 3x² dx = x³ + C</code></pre>
+                </div>
+                
+                <div class="card note">
+                  <h2>💡 Nota Histórica</h2>
+                  <p>El concepto de integral fue desarrollado de forma independiente por <strong>Isaac Newton</strong> y <strong>Gottfried Leibniz</strong> en el siglo XVII. Mientras Newton lo veía desde la física (fluxiones), Leibniz introdujo la notación <strong>∫</strong> que usamos hoy, ¡y que representa una "S" alargada de "suma"!</p>
+                </div>
+
+                <div class="quiz-section">
+                  <h2>🚀 ¡A Prueba! Desafía tus Conocimientos</h2>
+                  <div class="question">
+                      <p>1. ¿Qué representa la "C" en la integral indefinida?</p>
+                      <div class="options">
+                          <label><input type="radio" name="q1_1"> a) Una constante de cálculo.</label>
+                          <label><input type="radio" name="q1_1"> b) La constante de integración, que representa una familia de funciones.</label>
+                          <label><input type="radio" name="q1_1"> c) El coeficiente principal.</label>
+                      </div>
+                  </div>
+                  <div class="question">
+                      <p>2. La integración es el proceso inverso a...</p>
+                      <div class="options">
+                          <label><input type="radio" name="q1_2"> a) La derivación.</label>
+                          <label><input type="radio" name="q1_2"> b) La suma.</label>
+                          <label><input type="radio" name="q1_2"> c) La exponenciación.</label>
+                      </div>
+                  </div>
+                  <div class="question">
+                      <p>3. (Práctica) Calcula: ∫ 5 dx</p>
+                      <button class="btn-solution">Ver Solución</button>
+                      <div class="solution"><p>Respuesta: 5x + C</p></div>
+                  </div>
+                   <div class="question">
+                      <p>4. (Práctica) Calcula: ∫ x⁴ dx</p>
+                      <button class="btn-solution">Ver Solución</button>
+                      <div class="solution"><p>Respuesta: (x⁵ / 5) + C</p></div>
+                  </div>
+                   <div class="question">
+                      <p>5. (Práctica) Calcula: ∫ cos(x) dx</p>
+                      <button class="btn-solution">Ver Solución</button>
+                      <div class="solution"><p>Respuesta: sin(x) + C</p></div>
+                  </div>
+                </div>
+            </div>
+
+            <!-- CAPÍTULO 2 -->
+            <div id="cap2" class="chapter-content">
+                <h1><span class="accent-char">2.</span> Conceptos Fundamentales 🏛️</h1>
+                <p class="intro-text">Para dominar las integrales, primero debemos hablar el mismo idioma. Aquí sentaremos las bases y definiremos las partes clave de una integral.</p>
+                
+                <div class="card definition">
+                  <h2>🧠 Anatomía de una Integral</h2>
+                  <p>Vamos a desglosar la expresión de una integral indefinida:</p>
+                  <pre><code>∫ f(x) dx</code></pre>
+                  <ul>
+                    <li><strong>∫:</strong> Es el <strong>símbolo de integración</strong>.</li>
+                    <li><strong>f(x):</strong> Es el <strong>integrando</strong>, la función que queremos integrar.</li>
+                    <li><strong>dx:</strong> Es el <strong>diferencial</strong> de x. Nos indica que la variable de integración es 'x'. ¡Es crucial y no puedes olvidarlo!</li>
+                  </ul>
+                </div>
+                
+                <div class="card app">
+                    <h2>💻 Aplicación en Ciencias de la Computación</h2>
+                    <p>En computación gráfica, las integrales se usan para calcular la iluminación y el sombreado en modelos 3D. El "path tracing" simula cómo la luz rebota en una escena, y en su núcleo, ¡está resolviendo una compleja integral de renderizado!</p>
+                </div>
+                
+                <div class="quiz-section">
+                  <h2>🚀 ¡A Prueba! Desafía tus Conocimientos</h2>
+                   <div class="question">
+                      <p>1. En la expresión ∫ 2x dx, ¿qué es "2x"?</p>
+                      <div class="options">
+                          <label><input type="radio" name="q2_1"> a) El diferencial.</label>
+                          <label><input type="radio" name="q2_1"> b) El integrando.</label>
+                          <label><input type="radio" name="q2_1"> c) La constante de integración.</label>
+                      </div>
+                  </div>
+                   <div class="question">
+                      <p>2. ¿Qué nos indica el "dx"?</p>
+                      <div class="options">
+                          <label><input type="radio" name="q2_2"> a) Que la función es difícil.</label>
+                          <label><input type="radio" name="q2_2"> b) Que la variable de integración es x.</label>
+                          <label><input type="radio" name="q2_2"> c) Es solo decoración.</label>
+                      </div>
+                  </div>
+                  <div class="question">
+                      <p>3. (Práctica) Identifica el integrando en: ∫ (x² + 4x - 1) dx</p>
+                      <button class="btn-solution">Ver Solución</button>
+                      <div class="solution"><p>Respuesta: El integrando es x² + 4x - 1.</p></div>
+                  </div>
+                   <div class="question">
+                      <p>4. (Práctica) Identifica la variable de integración en: ∫ eᵗ dt</p>
+                      <button class="btn-solution">Ver Solución</button>
+                      <div class="solution"><p>Respuesta: La variable de integración es t.</p></div>
+                  </div>
+                   <div class="question">
+                      <p>5. (Práctica) Escribe la expresión para integrar la función g(z) con respecto a z.</p>
+                      <button class="btn-solution">Ver Solución</button>
+                      <div class="solution"><p>Respuesta: ∫ g(z) dz</p></div>
+                  </div>
+                </div>
+            </div>
+            
+            <!-- CAPÍTULO 3 -->
+            <div id="cap3" class="chapter-content">
+                <h1><span class="accent-char">3.</span> Propiedades de las Integrales 📜</h1>
+                <p class="intro-text">Las integrales tienen reglas, ¡y conocerlas es tu superpoder! Estas propiedades te permitirán descomponer problemas complejos en partes más sencillas.</p>
+
+                <div class="card definition">
+                  <h2>🧠 Propiedades Clave</h2>
+                  <p>Aquí tienes las dos reglas más importantes de la integración:</p>
+                  <ol>
+                    <li><strong>Suma/Resta:</strong> La integral de una suma (o resta) es la suma (o resta) de las integrales. Te permite dividir y conquistar.
+                        <pre><code>∫ [f(x) ± g(x)] dx = ∫ f(x) dx ± ∫ g(x) dx</code></pre>
+                    </li>
+                    <li><strong>Factor Constante:</strong> Puedes "sacar" las constantes que multiplican fuera de la integral. ¡Esto simplifica mucho las cosas!
+                        <pre><code>∫ k * f(x) dx = k * ∫ f(x) dx</code></pre>
+                    </li>
+                  </ol>
+                </div>
+
+                <div class="card example">
+                  <h2>✍️ Ejemplo de Aplicación</h2>
+                  <p>Calculemos <strong>∫ (4x³ - 6) dx</strong> usando las propiedades:</p>
+                  <ol>
+                    <li><strong>Separamos la resta (Propiedad 1):</strong><br> ∫ 4x³ dx - ∫ 6 dx</li>
+                    <li><strong>Sacamos las constantes (Propiedad 2):</strong><br> 4 * ∫ x³ dx - 6 * ∫ 1 dx</li>
+                    <li><strong>Integramos cada parte:</strong><br> 4 * (x⁴/4) - 6 * (x)</li>
+                    <li><strong>Simplificamos y añadimos C:</strong><br> x⁴ - 6x + C</li>
+                  </ol>
+                </div>
+
+                <div class="quiz-section">
+                  <h2>🚀 ¡A Prueba! Desafía tus Conocimientos</h2>
+                  <div class="question">
+                      <p>1. ¿Qué propiedad usas para simplificar ∫ 7sin(x) dx?</p>
+                      <div class="options">
+                          <label><input type="radio" name="q3_1"> a) Propiedad de la suma.</label>
+                          <label><input type="radio" name="q3_1"> b) Propiedad del factor constante.</label>
+                          <label><input type="radio" name="q3_1"> c) Ninguna, no se puede simplificar.</label>
+                      </div>
+                  </div>
+                  <div class="question">
+                      <p>2. La expresión ∫ x dx + ∫ eˣ dx es equivalente a:</p>
+                      <div class="options">
+                          <label><input type="radio" name="q3_2"> a) ∫ (x * eˣ) dx</label>
+                          <label><input type="radio" name="q3_2"> b) ∫ (x + eˣ) dx</label>
+                          <label><input type="radio" name="q3_2"> c) No son equivalentes.</label>
+                      </div>
+                  </div>
+                  <div class="question">
+                      <p>3. (Práctica) Usa las propiedades para reescribir: ∫ (5x² + 2x) dx</p>
+                      <button class="btn-solution">Ver Solución</button>
+                      <div class="solution"><p>Respuesta: 5 * ∫ x² dx + 2 * ∫ x dx</p></div>
+                  </div>
+                   <div class="question">
+                      <p>4. (Práctica) Calcula: ∫ 8eˣ dx</p>
+                      <button class="btn-solution">Ver Solución</button>
+                      <div class="solution"><p>Respuesta: 8eˣ + C</p></div>
+                  </div>
+                   <div class="question">
+                      <p>5. (Práctica) Calcula: ∫ (2cos(x) - 3x²) dx</p>
+                      <button class="btn-solution">Ver Solución</button>
+                      <div class="solution"><p>Respuesta: 2sin(x) - x³ + C</p></div>
+                  </div>
+                </div>
+            </div>
+
+            <!-- CAPÍTULO 4 -->
+            <div id="cap4" class="chapter-content">
+                <h1><span class="accent-char">4.</span> Integrales Inmediatas ⚡</h1>
+                <p class="intro-text">Estas son las integrales que debes conocer de memoria. Son tus herramientas básicas, como saber las tablas de multiplicar. ¡Vamos a dominarlas!</p>
+
+                <div class="card definition">
+                  <h2>🧠 Tabla de Integrales Básicas</h2>
+                  <p>Aquí tienes una lista de las integrales más comunes. ¡Apréndetelas bien!</p>
+                  <ul>
+                    <li><strong>Regla de la Potencia:</strong> <pre><code>∫ xⁿ dx = (xⁿ⁺¹ / (n+1)) + C  (si n ≠ -1)</code></pre></li>
+                    <li><strong>Caso especial n=-1:</strong> <pre><code>∫ (1/x) dx = ln|x| + C</code></pre></li>
+                    <li><strong>Exponencial:</strong> <pre><code>∫ eˣ dx = eˣ + C</code></pre></li>
+                    <li><strong>Trigonométricas:</strong>
+                        <pre><code>∫ cos(x) dx = sin(x) + C
+∫ sin(x) dx = -cos(x) + C
+∫ sec²(x) dx = tan(x) + C</code></pre>
+                    </li>
+                  </ul>
+                </div>
+
+                <div class="card example">
+                  <h2>✍️ Ejemplo Rápido</h2>
+                  <p>Calcular <strong>∫ (x³ + 1/x) dx</strong>.</p>
+                  <ol>
+                    <li><strong>Separamos la integral:</strong> ∫ x³ dx + ∫ (1/x) dx</li>
+                    <li><strong>Aplicamos la regla de la potencia a la primera parte:</strong> (x⁴ / 4)</li>
+                    <li><strong>Aplicamos la regla del logaritmo a la segunda:</strong> ln|x|</li>
+                    <li><strong>Unimos todo con la constante C:</strong> (x⁴ / 4) + ln|x| + C</li>
+                  </ol>
+                </div>
+
+                <div class="quiz-section">
+                  <h2>🚀 ¡A Prueba! Desafía tus Conocimientos</h2>
+                  <!-- Quiz para Cap 4 -->
+                  <div class="question">
+                      <p>1. ¿Cuál es la integral de x⁻¹?</p>
+                      <div class="options">
+                          <label><input type="radio" name="q4_1"> a) x⁰ + C</label>
+                          <label><input type="radio" name="q4_1"> b) ln|x| + C</label>
+                          <label><input type="radio" name="q4_1"> c) -x⁻² + C</label>
+                      </div>
+                  </div>
+                  <div class="question">
+                      <p>2. La integral de sin(x) es:</p>
+                      <div class="options">
+                          <label><input type="radio" name="q4_2"> a) cos(x) + C</label>
+                          <label><input type="radio" name="q4_2"> b) -cos(x) + C</label>
+                          <label><input type="radio" name="q4_2"> c) tan(x) + C</label>
+                      </div>
+                  </div>
+                  <div class="question">
+                      <p>3. (Práctica) Calcula: ∫ √x dx  (Pista: √x = x¹/²)</p>
+                      <button class="btn-solution">Ver Solución</button>
+                      <div class="solution"><p>Respuesta: (2/3)x³/² + C</p></div>
+                  </div>
+                   <div class="question">
+                      <p>4. (Práctica) Calcula: ∫ (eˣ + 2) dx</p>
+                      <button class="btn-solution">Ver Solución</button>
+                      <div class="solution"><p>Respuesta: eˣ + 2x + C</p></div>
+                  </div>
+                   <div class="question">
+                      <p>5. (Práctica) Calcula: ∫ 1/x² dx (Pista: 1/x² = x⁻²)</p>
+                      <button class="btn-solution">Ver Solución</button>
+                      <div class="solution"><p>Respuesta: -1/x + C</p></div>
+                  </div>
+                </div>
+            </div>
+
+            <!-- CAPÍTULO 5 -->
+            <div id="cap5" class="chapter-content">
+                <h1><span class="accent-char">5.</span> Integrales por Cambio de Variable 🔄</h1>
+                <p class="intro-text">Esta es la "regla de la cadena" pero para integrar. Es una técnica súper poderosa para transformar una integral complicada en una inmediata.</p>
+
+                <div class="card definition">
+                  <h2>🧠 El Método: Sustitución o Cambio de Variable</h2>
+                  <p>La idea es simplificar el integrando. Seguimos estos pasos:</p>
+                  <ol>
+                    <li><strong>Elige 'u':</strong> Busca una parte de la integral (normalmente dentro de un paréntesis, raíz o exponente) cuya derivada también aparezca en la integral. Llama a esa parte <strong>u</strong>.</li>
+                    <li><strong>Calcula 'du':</strong> Deriva 'u' para encontrar <strong>du</strong>. (du = u' dx).</li>
+                    <li><strong>Sustituye:</strong> Reemplaza todo en la integral original en términos de 'u' y 'du'. Si lo hiciste bien, la nueva integral será mucho más fácil.</li>
+                    <li><strong>Integra:</strong> Resuelve la nueva integral con respecto a 'u'.</li>
+                    <li><strong>Deshaz el cambio:</strong> Vuelve a sustituir 'u' por su expresión original en 'x'.</li>
+                  </ol>
+                </div>
+
+                <div class="card example">
+                  <h2>✍️ Ejemplo: ∫ 2x * (x² + 1)⁵ dx</h2>
+                  <ol>
+                    <li><strong>Elige u:</strong> La parte "interna" es (x² + 1). Así que, <strong>u = x² + 1</strong>.</li>
+                    <li><strong>Calcula du:</strong> La derivada de u es 2x. Por tanto, <strong>du = 2x dx</strong>.</li>
+                    <li><strong>Sustituye:</strong> Fíjate que tenemos (x² + 1) que es 'u', y '2x dx' que es 'du'. La integral se convierte en: <strong>∫ u⁵ du</strong>.</li>
+                    <li><strong>Integra:</strong> ¡Esta es inmediata! La integral es <strong>u⁶ / 6 + C</strong>.</li>
+                    <li><strong>Deshaz el cambio:</strong> Sustituye u de vuelta: <strong>(x² + 1)⁶ / 6 + C</strong>.</li>
+                  </ol>
+                </div>
+                
+                <div class="quiz-section">
+                  <h2>🚀 ¡A Prueba! Desafía tus Conocimientos</h2>
+                  <!-- Quiz para Cap 5 -->
+                  <div class="question">
+                      <p>1. ¿Cuál es el objetivo principal del cambio de variable?</p>
+                      <div class="options">
+                          <label><input type="radio" name="q5_1"> a) Hacer la integral más larga.</label>
+                          <label><input type="radio" name="q5_1"> b) Comprobar si sabes derivar.</label>
+                          <label><input type="radio" name="q5_1"> c) Simplificar el integrando a una forma más básica.</label>
+                      </div>
+                  </div>
+                  <div class="question">
+                      <p>2. En ∫ cos(3x+2) dx, ¿cuál sería una buena elección para 'u'?</p>
+                      <div class="options">
+                          <label><input type="radio" name="q5_2"> a) u = cos(x)</label>
+                          <label><input type="radio" name="q5_2"> b) u = 3x+2</label>
+                          <label><input type="radio" name="q5_2"> c) u = x</label>
+                      </div>
+                  </div>
+                  <div class="question">
+                      <p>3. (Práctica) Calcula: ∫ (x+1)⁴ dx</p>
+                      <button class="btn-solution">Ver Solución</button>
+                      <div class="solution"><p>Respuesta: ((x+1)⁵ / 5) + C</p></div>
+                  </div>
+                   <div class="question">
+                      <p>4. (Práctica) Calcula: ∫ e⁵ˣ dx</p>
+                      <button class="btn-solution">Ver Solución</button>
+                      <div class="solution"><p>Respuesta: (1/5)e⁵ˣ + C</p></div>
+                  </div>
+                   <div class="question">
+                      <p>5. (Práctica) Calcula: ∫ 3x² * sin(x³) dx</p>
+                      <button class="btn-solution">Ver Solución</button>
+                      <div class="solution"><p>Respuesta: -cos(x³) + C</p></div>
+                  </div>
+                </div>
+            </div>
+
+            <!-- CAPÍTULO 6 -->
+            <div id="cap6" class="chapter-content">
+                <h1><span class="accent-char">6.</span> Integrales por Partes 👯</h1>
+                <p class="intro-text">Esta técnica se usa cuando tienes el producto de dos funciones. La clave es una famosa fórmula que te ayudará a recordarla: "Un Día Vi Una Vaca Vestida De Uniforme".</p>
+
+                <div class="card definition">
+                  <h2>🧠 La Fórmula de Integración por Partes</h2>
+                  <p>Derivada de la regla del producto para derivar, la fórmula es:</p>
+                  <pre><code>∫ u dv = u * v - ∫ v du</code></pre>
+                  <p>El truco está en elegir correctamente qué parte de tu integral original será 'u' y qué parte será 'dv'. Una buena regla general es la regla <strong>LIATE</strong> (Logarítmicas, Inversas, Algebraicas, Trigonométricas, Exponenciales). Elige 'u' según lo que aparezca primero en esa lista.</p>
+                </div>
+
+                <div class="card example">
+                  <h2>✍️ Ejemplo: ∫ x * eˣ dx</h2>
+                  <ol>
+                    <li><strong>Elige u y dv:</strong> Siguiendo LIATE, 'x' es Algebraica y 'eˣ' es Exponencial. Así que elegimos <strong>u = x</strong> y <strong>dv = eˣ dx</strong>.</li>
+                    <li><strong>Calcula du y v:</strong>
+                        <ul>
+                            <li>Si u = x, entonces <strong>du = dx</strong>.</li>
+                            <li>Si dv = eˣ dx, integramos para encontrar v: <strong>v = ∫ eˣ dx = eˣ</strong>.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Aplica la fórmula:</strong> ∫ u dv = u*v - ∫ v du</li>
+                    <li><strong>Sustituye:</strong> ∫ x * eˣ dx = x*eˣ - ∫ eˣ dx</li>
+                    <li><strong>Resuelve la integral restante:</strong> La integral de eˣ es simplemente eˣ.</li>
+                    <li><strong>Resultado final:</strong> x*eˣ - eˣ + C</li>
+                  </ol>
+                </div>
+
+                <div class="quiz-section">
+                  <h2>🚀 ¡A Prueba! Desafía tus Conocimientos</h2>
+                  <!-- Quiz para Cap 6 -->
+                  <div class="question">
+                      <p>1. ¿Cuándo es más útil la integración por partes?</p>
+                      <div class="options">
+                          <label><input type="radio" name="q6_1"> a) Para integrar una suma de funciones.</label>
+                          <label><input type="radio" name="q6_1"> b) Para integrar un producto de funciones.</label>
+                          <label><input type="radio" name="q6_1"> c) Cuando la integral es inmediata.</label>
+                      </div>
+                  </div>
+                  <div class="question">
+                      <p>2. En ∫ x * cos(x) dx, ¿cuál es la mejor elección para 'u' según LIATE?</p>
+                      <div class="options">
+                          <label><input type="radio" name="q6_2"> a) u = cos(x)</label>
+                          <label><input type="radio" name="q6_2"> b) u = x * cos(x)</label>
+                          <label><input type="radio" name="q6_2"> c) u = x</label>
+                      </div>
+                  </div>
+                  <div class="question">
+                      <p>3. (Práctica) Calcula: ∫ x * sin(x) dx</p>
+                      <button class="btn-solution">Ver Solución</button>
+                      <div class="solution"><p>Respuesta: -x*cos(x) + sin(x) + C</p></div>
+                  </div>
+                   <div class="question">
+                      <p>4. (Práctica) Calcula: ∫ ln(x) dx (Pista: u=ln(x), dv=dx)</p>
+                      <button class="btn-solution">Ver Solución</button>
+                      <div class="solution"><p>Respuesta: x*ln(x) - x + C</p></div>
+                  </div>
+                   <div class="question">
+                      <p>5. (Práctica) En ∫ x² * eˣ dx, ¿cuántas veces tendrías que aplicar integración por partes?</p>
+                      <button class="btn-solution">Ver Solución</button>
+                      <div class="solution"><p>Respuesta: Dos veces. La primera reduce x² a x, y la segunda reduce x a 1.</p></div>
+                  </div>
+                </div>
+            </div>
+
+            <!-- CAPÍTULO 7 -->
+            <div id="cap7" class="chapter-content">
+                <h1><span class="accent-char">7.</span> Integral Definida  एरिया</h1>
+                <p class="intro-text">Ahora le damos un propósito concreto a la integral: calcular valores numéricos, como el área bajo una curva. ¡Aquí es donde todo cobra sentido!</p>
+
+                <div class="card definition">
+                  <h2>🧠 Definición: Integral Definida y Teorema Fundamental del Cálculo</h2>
+                  <p>Una integral definida tiene <strong>límites de integración</strong> (un valor inicial 'a' y un valor final 'b'). El resultado no es una familia de funciones, sino un <strong>número</strong>.</p>
+                  <pre><code>∫ₐᵇ f(x) dx</code></pre>
+                  <p>El <strong>Segundo Teorema Fundamental del Cálculo</strong> nos da la receta para resolverla:</p>
+                  <ol>
+                    <li>Encuentra la antiderivada F(x) de f(x) (como en las integrales indefinidas, pero sin la C).</li>
+                    <li>Evalúa F(x) en el límite superior 'b': F(b).</li>
+                    <li>Evalúa F(x) en el límite inferior 'a': F(a).</li>
+                    <li>Resta los dos valores: <strong>F(b) - F(a)</strong>.</li>
+                  </ol>
+                </div>
+                
+                <div class="card example">
+                  <h2>✍️ Ejemplo: ∫₀² x² dx</h2>
+                  <ol>
+                    <li><strong>Antiderivada:</strong> La integral de x² es F(x) = x³/3.</li>
+                    <li><strong>Evaluar en b=2:</strong> F(2) = 2³/3 = 8/3.</li>
+                    <li><strong>Evaluar en a=0:</strong> F(0) = 0³/3 = 0.</li>
+                    <li><strong>Restar:</strong> F(2) - F(0) = 8/3 - 0 = 8/3 ≈ 2.67.</li>
+                  </ol>
+                </div>
+
+                <div class="card interactive">
+                  <h2>💻 ¡Visualiza la Suma de Riemann!</h2>
+                  <p>La integral definida es el límite de una suma de áreas de rectángulos (Suma de Riemann) cuando el número de rectángulos tiende a infinito. ¡Juega con el deslizador para ver cómo la aproximación mejora a medida que aumentas el número de rectángulos 'n'!</p>
+                  <div class="interactive-container">
+                      <canvas id="riemann-canvas"></canvas>
+                      <div class="controls">
+                          <div class="slider-container">
+                              <label for="n-slider">n = <span id="n-value">4</span></label>
+                              <input type="range" min="4" max="100" value="4" class="slider" id="n-slider">
+                          </div>
+                          <div class="info-display">
+                              <p>Área Aproximada: <span id="approx-area">...</span></p>
+                              <p>Área Real (Integral): <span>2.67</span></p>
+                          </div>
+                      </div>
+                  </div>
+                </div>
+
+                <div class="quiz-section">
+                  <h2>🚀 ¡A Prueba! Desafía tus Conocimientos</h2>
+                  <!-- Quiz para Cap 7 -->
+                  <div class="question">
+                      <p>1. ¿Cuál es el resultado de una integral definida?</p>
+                      <div class="options">
+                          <label><input type="radio" name="q7_1"> a) Una función con "+ C".</label>
+                          <label><input type="radio" name="q7_1"> b) Un número.</label>
+                          <label><input type="radio" name="q7_1"> c) Otra integral.</label>
+                      </div>
+                  </div>
+                  <div class="question">
+                      <p>2. ¿Qué representa geométricamente la integral definida ∫ₐᵇ f(x) dx si f(x) > 0?</p>
+                      <div class="options">
+                          <label><input type="radio" name="q7_2"> a) La pendiente de la curva.</label>
+                          <label><input type="radio" name="q7_2"> b) La longitud de la curva.</label>
+                          <label><input type="radio" name="q7_2"> c) El área bajo la curva entre x=a y x=b.</label>
+                      </div>
+                  </div>
+                  <div class="question">
+                      <p>3. (Práctica) Calcula: ∫₀¹ 2x dx</p>
+                      <button class="btn-solution">Ver Solución</button>
+                      <div class="solution"><p>Respuesta: 1</p></div>
+                  </div>
+                   <div class="question">
+                      <p>4. (Práctica) Calcula: ∫₁ᵉ (1/x) dx</p>
+                      <button class="btn-solution">Ver Solución</button>
+                      <div class="solution"><p>Respuesta: 1 (porque ln(e) - ln(1) = 1 - 0)</p></div>
+                  </div>
+                   <div class="question">
+                      <p>5. (Práctica) Calcula: ∫₀ᴨ cos(x) dx</p>
+                      <button class="btn-solution">Ver Solución</button>
+                      <div class="solution"><p>Respuesta: 0 (porque sin(π) - sin(0) = 0 - 0)</p></div>
+                  </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- NAVEGACIÓN ENTRE CAPÍTULOS ---
+            const navLinks = document.querySelectorAll('.nav-link');
+            const chapters = document.querySelectorAll('.chapter-content');
+
+            function switchChapter(hash) {
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.hash === hash);
+                });
+                chapters.forEach(chapter => {
+                    chapter.classList.toggle('active', '#' + chapter.id === hash);
+                });
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetHash = this.hash;
+                    switchChapter(targetHash);
+                });
+            });
+
+            // --- LÓGICA DE LOS BOTONES DE SOLUCIÓN ---
+            const solutionButtons = document.querySelectorAll('.btn-solution');
+            solutionButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const solutionDiv = this.nextElementSibling;
+                    if (solutionDiv && solutionDiv.classList.contains('solution')) {
+                        const isVisible = solutionDiv.style.display === 'block';
+                        solutionDiv.style.display = isVisible ? 'none' : 'block';
+                        this.textContent = isVisible ? 'Ver Solución' : 'Ocultar Solución';
+                    }
+                });
+            });
+
+            // --- LÓGICA DEL BOTÓN DE IMPRESIÓN ---
+            const printButton = document.getElementById('print-pdf-btn');
+            if(printButton) {
+                printButton.addEventListener('click', function() {
+                    // En una aplicación real, aquí se podría generar un PDF específico
+                    // o enlazar a un archivo PDF preexistente (como 'placeholder.pdf').
+                    // Para esta demostración, simplemente abriremos el diálogo de impresión del navegador
+                    // para la página actual.
+                    //window.print();
+                    window.open('integral_calculus_formula_sheet.pdf', '_blank');
+                });
+            }
+
+            // --- LÓGICA DE LA SUMA DE RIEMANN ---
+            const slider = document.getElementById('n-slider');
+            const nValueSpan = document.getElementById('n-value');
+            const approxAreaSpan = document.getElementById('approx-area');
+            const canvas = document.getElementById('riemann-canvas');
+            
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                
+                const func = x => x * x; // f(x) = x^2
+                const a = 0;
+                const b = 2;
+                const yMax = func(b);
+
+                function drawRiemannSum(n) {
+                    const rect = canvas.getBoundingClientRect();
+                    canvas.width = rect.width * devicePixelRatio;
+                    canvas.height = rect.height * devicePixelRatio;
+                    ctx.scale(devicePixelRatio, devicePixelRatio);
+
+                    const canvasWidth = canvas.clientWidth;
+                    const canvasHeight = canvas.clientHeight;
+
+                    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+                    const deltaX = (b - a) / n;
+                    let approxArea = 0;
+
+                    const mapX = x => (x - a) / (b - a) * canvasWidth;
+                    const mapY = y => canvasHeight - (y / yMax * canvasHeight);
+
+                    ctx.strokeStyle = '#333';
+                    ctx.fillStyle = 'rgba(0, 191, 255, 0.5)';
+                    for (let i = 0; i < n; i++) {
+                        const x_i = a + i * deltaX;
+                        const y_i = func(x_i + deltaX);
+                        approxArea += y_i * deltaX;
+
+                        const canvasX = mapX(x_i);
+                        const canvasY = mapY(y_i);
+                        const rectWidth = mapX(a + deltaX) - mapX(a);
+                        const rectHeight = canvasHeight - canvasY;
+                        
+                        ctx.fillRect(canvasX, canvasY, rectWidth, rectHeight);
+                        ctx.strokeRect(canvasX, canvasY, rectWidth, rectHeight);
+                    }
+
+                    ctx.beginPath();
+                    ctx.lineWidth = 3;
+                    ctx.strokeStyle = '#DA70D6';
+                    for (let x = a; x <= b; x += 0.01) {
+                        ctx.lineTo(mapX(x), mapY(func(x)));
+                    }
+                    ctx.stroke();
+                    
+                    nValueSpan.textContent = n;
+                    approxAreaSpan.textContent = approxArea.toFixed(4);
+                }
+                
+                slider.addEventListener('input', function() {
+                    drawRiemannSum(parseInt(this.value));
+                });
+                
+                drawRiemannSum(parseInt(slider.value));
+            }
+        });
+    </script>
+</body>
+</html>
